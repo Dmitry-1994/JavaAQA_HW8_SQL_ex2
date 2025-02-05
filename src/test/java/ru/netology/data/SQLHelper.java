@@ -28,6 +28,14 @@ public class SQLHelper {
     }
 
     @SneakyThrows
+    public static int getCardBalance() {
+        var dataSQL = "SELECT balance_in_kopecks FROM cards WHERE number = '5559 0000 0000 0002'";
+        try (var conn = getConnection()) {
+            return runner.query(conn, dataSQL, new ScalarHandler<>());
+        }
+    }
+
+    @SneakyThrows
     public static void clearDataBase() {
         try (var conn = getConnection()) {
             runner.update(conn, "DELETE FROM card_transactions");

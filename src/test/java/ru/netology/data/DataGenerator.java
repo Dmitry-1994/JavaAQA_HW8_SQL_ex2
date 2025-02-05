@@ -1,16 +1,13 @@
 package ru.netology.data;
 
-import com.github.javafaker.Faker;
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Value;
-
-import java.util.Locale;
 
 import static io.restassured.RestAssured.given;
 
@@ -18,27 +15,8 @@ public class DataGenerator {
     private DataGenerator() {
     }
 
-    private static final Faker faker = new Faker(new Locale("en"));
-
-    private static String getRandomLogin() {
-        return faker.name().username();
-    }
-
-    private static String getRandomPass() {
-        return faker.internet().password();
-    }
-
-    public static LoginInfo getRandomUser() {
-        return new LoginInfo(getRandomLogin(), getRandomPass());
-    }
-
     public static LoginInfo getTestUser() {
         return new LoginInfo("vasya", "qwerty123");
-    }
-
-    public static CardsInfo getTestCardsFrom() {
-        String balance = String.valueOf((int) Math.random() * 1_000_001);
-        return new CardsInfo("5559 0000 0000 0002", balance);
     }
 
     public static VerInfo getTestVer() {
@@ -48,10 +26,10 @@ public class DataGenerator {
         return new VerInfo(login, code);
     }
 
-
-    public static VerificationCode getRandomVerCode() {
-        return new VerificationCode(faker.numerify("######"));
+    public static TransitInfo getTestTransitInfo() {
+        return new TransitInfo("5559 0000 0000 0002", "5559 0000 0000 0008", 5000);
     }
+
 
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
@@ -61,8 +39,7 @@ public class DataGenerator {
             .log(LogDetail.ALL)
             .build();
 
-    public static void sendRequest() {
-        var user = getTestUser();
+    public static void sendAuth(LoginInfo user) {
         given()
                 .spec(requestSpec)
                 .body(user)
@@ -72,18 +49,33 @@ public class DataGenerator {
                 .statusCode(200);
     }
 
-    public static void sendVer() {
+    public static TokenCode sendVer() {
         var ver = getTestVer();
-        String token = "token";
-        given()
+        RequestSpecification request = RestAssured.given()
                 .spec(requestSpec)
-                .body(ver)
-                .when()
-                    .post("/api/auth/verification")
-                .then()
-                    .statusCode(200)
-                .extract()
-                    .path(token);
+                .body(ver);
+        Response response = request.when()
+                .post("/api/auth/verification");
+        response.then()
+                .statusCode(200);
+
+        TokenCode tokenCode = new TokenCode();
+        tokenCode.setToken(response.jsonPath().getString("token"));
+
+        return tokenCode;
+
+    }
+
+    public static void sendTransit(TokenCode tokenCode) {
+        var transitInfo = getTestTransitInfo();
+        RequestSpecification request = RestAssured.given()
+                .spec(requestSpec)
+                .header("Authorization", "Bearer " + tokenCode.getToken())
+                .body(transitInfo);
+        Response response = request.when()
+                .post("/api/transfer");
+        response.then()
+                .statusCode(200);
 
     }
 
@@ -94,21 +86,20 @@ public class DataGenerator {
     }
 
     @Value
-    public static class CardsInfo {
-        String number;
-        String balanceInKopecks;
-    }
-
-    @Value
     public static class VerInfo {
         String login;
         String code;
     }
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class VerificationCode {
-        String code;
+    public static class TokenCode {
+        String token;
+    }
+
+    @Value
+    public static class TransitInfo {
+        String from;
+        String to;
+        int amount;
     }
 }
