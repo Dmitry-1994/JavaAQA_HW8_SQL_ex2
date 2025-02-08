@@ -1,9 +1,12 @@
 package ru.netology.data;
 
 import com.google.gson.JsonArray;
-import io.restassured.response.Response;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import lombok.Data;
 import lombok.Value;
+
+import static ru.netology.data.APIHelper.getCardInfoJson;
 
 public class DataGenerator {
     private DataGenerator() {
@@ -23,10 +26,24 @@ public class DataGenerator {
         return new TransitInfo(cardFrom, cardTo, amount);
     }
 
-    //public static int getCrdInfoByJsonToData(String cardNumber, Response response) {
-    //    String jsonResponse = response.path("balance", )
-    //    JsonArray jsonArray = ;
-    //}
+    public static int getCrdBalanceData(String cardNumber, TokenCode tokenCode) {
+        int cardBalance = 0;
+        String cardNumberShortExp = cardNumber.substring(cardNumber.length() - 4);
+        String jsonResponse = getCardInfoJson(tokenCode);
+        JsonArray jsonArray = JsonParser.parseString(jsonResponse).getAsJsonArray();
+
+        for (JsonElement element : jsonArray) {
+            String number = element.getAsJsonObject().get("number").getAsString();
+            String numberShortAct = number.substring(number.length() - 4);
+
+            if (cardNumberShortExp.equals(numberShortAct)) {
+                cardBalance =  element.getAsJsonObject().get("balance").getAsInt();
+            }
+        }
+
+        return cardBalance;
+
+    }
 
     @Value
     public static class LoginInfo {

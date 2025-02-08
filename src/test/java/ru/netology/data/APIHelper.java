@@ -39,11 +39,14 @@ public class APIHelper {
                 .body(ver);
         Response response = request.when()
                 .post("/api/auth/verification");
-        response.then()
-                .statusCode(200);
+        String token = response.then()
+                .statusCode(200)
+                .extract()
+                .path("token");
+
 
         DataGenerator.TokenCode tokenCode = new DataGenerator.TokenCode();
-        tokenCode.setToken(response.jsonPath().getString("token"));
+        tokenCode.setToken(token);
 
         return tokenCode;
 
@@ -61,15 +64,17 @@ public class APIHelper {
 
     }
 
-    public static Response getCrdInfoJson(DataGenerator.TokenCode tokenCode) {
-        RequestSpecification request = RestAssured.given()
+    public static String getCardInfoJson(DataGenerator.TokenCode tokenCode) {
+        RequestSpecification request = given()
                 .spec(requestSpec)
                 .header("Authorization", "Bearer " + tokenCode.getToken());
         Response response = request.when()
-                .get("/api/cards");
-        response.then()
-                .statusCode(200);
+                .get("/api/cards")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
 
-        return response;
+        return response.toString();
     }
 }
