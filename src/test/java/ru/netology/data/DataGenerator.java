@@ -1,8 +1,5 @@
 package ru.netology.data;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import lombok.Data;
 import lombok.Value;
 
@@ -29,15 +26,14 @@ public class DataGenerator {
     public static int getCrdBalanceData(String cardNumber, TokenCode tokenCode) {
         int cardBalance = 0;
         String cardNumberShortExp = cardNumber.substring(cardNumber.length() - 4);
-        String jsonResponse = getCardInfoJson(tokenCode);
-        JsonArray jsonArray = JsonParser.parseString(jsonResponse).getAsJsonArray();
+        CardInfo[] jsonArray = getCardInfoJson(tokenCode);
 
-        for (JsonElement element : jsonArray) {
-            String number = element.getAsJsonObject().get("number").getAsString();
+        for (CardInfo element : jsonArray) {
+            String number = element.getNumber();
             String numberShortAct = number.substring(number.length() - 4);
 
             if (cardNumberShortExp.equals(numberShortAct)) {
-                cardBalance =  element.getAsJsonObject().get("balance").getAsInt();
+                cardBalance = element.getBalance();
             }
         }
 
@@ -69,10 +65,10 @@ public class DataGenerator {
         int amount;
     }
 
-    //@Value
-    //public static class CardInfo {
-    //    String id;
-    //    String number;
-    //    int balance;
-    //}
+    @Value
+    public static class CardInfo {
+        String id;
+        String number;
+        int balance;
+    }
 }

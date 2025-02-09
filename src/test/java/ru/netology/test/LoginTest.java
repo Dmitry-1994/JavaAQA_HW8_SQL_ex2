@@ -30,25 +30,6 @@ public class LoginTest {
     }
 
     @Test
-    void successLoginWithTest() {
-        sendAuth(userInfo);
-
-        var token = sendVer(userInfo);
-
-        int startCardBalance = getCardBalance();
-
-        TransitInfo transitInfo = getTestTransitInfo(cardSecond, cardTo, amountTransit);
-        int transitBalance = transitInfo.getAmount() * 100;
-
-        sendTransit(transitInfo, token);
-
-
-        int expectedBalance = startCardBalance - transitBalance;
-        int actualBalance = getCardBalance();
-
-        Assertions.assertEquals(expectedBalance, actualBalance);
-    }
-    @Test
     void successLoginWithTestData() {
         sendAuth(userInfo);
 
@@ -63,16 +44,14 @@ public class LoginTest {
         sendTransit(transitInfo, token);
 
 
-
         int expectedBalanceCardFirst = startBalanceCardFirst - transitBalance;
         int expectedBalanceCardSecond = startBalanceCardSecond + transitBalance;
 
         int finishBalanceCardFirst = getCrdBalanceData(cardFirst, token);
-        int finishBalanceCardSecond = getCrdBalanceData(cardFirst, token);
+        int finishBalanceCardSecond = getCrdBalanceData(cardSecond, token);
 
         Assertions.assertEquals(expectedBalanceCardFirst, finishBalanceCardFirst);
         Assertions.assertEquals(expectedBalanceCardSecond, finishBalanceCardSecond);
     }
-
 
 }

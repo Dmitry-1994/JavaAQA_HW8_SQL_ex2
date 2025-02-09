@@ -64,17 +64,17 @@ public class APIHelper {
 
     }
 
-    public static String getCardInfoJson(DataGenerator.TokenCode tokenCode) {
+    public static DataGenerator.CardInfo[] getCardInfoJson(DataGenerator.TokenCode tokenCode) {
         RequestSpecification request = given()
                 .spec(requestSpec)
                 .header("Authorization", "Bearer " + tokenCode.getToken());
         Response response = request.when()
-                .get("/api/cards")
-                .then()
+                .get("/api/cards");
+        DataGenerator.CardInfo cardInfo[] = response.then()
                 .statusCode(200)
-                .extract()
-                .response();
+                        .extract()
+                .body().as(DataGenerator.CardInfo[].class);
 
-        return response.toString();
+        return cardInfo;
     }
 }
