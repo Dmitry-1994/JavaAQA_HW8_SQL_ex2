@@ -41,6 +41,10 @@ public class DataGenerator {
 
     }
 
+    public static int getRandomTransitBalance(int originalBalance) {
+        return (int) (Math.random() * originalBalance + 1);
+    }
+
     @Value
     public static class LoginInfo {
         String login;

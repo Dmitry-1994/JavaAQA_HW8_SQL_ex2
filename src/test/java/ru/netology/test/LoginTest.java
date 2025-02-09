@@ -17,7 +17,6 @@ public class LoginTest {
     String cardFirst = "5559 0000 0000 0001";
     String cardSecond = "5559 0000 0000 0002";
     String cardTo = "5559 0000 0000 0008";
-    int amountTransit = 5000;
 
     @AfterEach
     void clear() {
@@ -38,11 +37,12 @@ public class LoginTest {
         int startBalanceCardFirst = getCrdBalanceData(cardFirst, token);
         int startBalanceCardSecond = getCrdBalanceData(cardFirst, token);
 
+        int amountTransit = getRandomTransitBalance(startBalanceCardFirst);
+
         TransitInfo transitInfo = getTestTransitInfo(cardFirst, cardSecond, amountTransit);
         int transitBalance = transitInfo.getAmount();
 
         sendTransit(transitInfo, token);
-
 
         int expectedBalanceCardFirst = startBalanceCardFirst - transitBalance;
         int expectedBalanceCardSecond = startBalanceCardSecond + transitBalance;
